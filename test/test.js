@@ -8,7 +8,7 @@ const before = lab.before;
 const after = lab.after;
 const expect = Code.expect;
 
-var jsmeta = require('./../jsmeta.js')();
+var jsmeta = require('./../jsmeta.js');
 
 describe('jsmeta', () => {
 
