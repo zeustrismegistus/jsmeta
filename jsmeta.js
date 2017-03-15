@@ -375,7 +375,7 @@
 		validateIsFunction : function (expectedFn)
 		{  
 			"use strict";
-			if(!d_.JSMeta.isFunction(expectedFn))
+			if(!JSMeta.isFunction(expectedFn))
 				throw "not function";
 		},
 		validateIsArray : function(expectedArray)
