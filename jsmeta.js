@@ -350,11 +350,65 @@
 	(function(){
 		
 		JSMeta.arrayutil = ArrayUtil;
-		
-		//lock it down
-		Object.freeze(JSMeta);   
 	})();
 
+	const Validators = 
+	{
+		validateNotUndefined : function (obj)
+		{  
+			"use strict";
+			if(obj === undefined)
+				throw "undefined";
+		},
+		validateNotNull : function (obj)
+		{   
+			"use strict";
+			if(obj === null)
+				throw "null";
+		},
+		validateNotNullOrUndefined : function(obj)
+		{   
+			"use strict";
+			Validators.validateNotUndefined(obj);
+			Validators.validateNotNull(obj);
+		},
+		validateIsFunction : function (expectedFn)
+		{  
+			"use strict";
+			if(!d_.JSMeta.isFunction(expectedFn))
+				throw "not function";
+		},
+		validateIsArray : function(expectedArray)
+		{
+			"use strict";
+			Validators.validateNotNullOrUndefined(expectedArray);
+			
+			if(!Array.isArray(expectedArray))
+				throw "not array";
+		},
+		assert : function( /* assertion function returns bool*/ assertionFn)
+		{   
+			"use strict";
+			Validators.validateNotNullOrUndefined(assertionFn);
+			Validators.validateIsFunction(assertionFn);
+			
+			var rv = assertionFn();
+			if(!rv)
+				throw "invalid assertion"
+		}
+
+	};
+
+	(function(){
+		//lock it down
+		Object.freeze(Validators);   
+
+		JSMeta.validators = Validators;
+		
+		//lock it down
+		Object.freeze(JSMeta); 		
+	})();
+	
 
 	//wire up the exports
 	
