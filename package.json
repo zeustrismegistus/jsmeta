@@ -1,6 +1,6 @@
 {
   "name": "d__jsmeta",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "js meta utilities",
   "main": "jsmeta.js",
   "scripts": {
@@ -18,8 +18,7 @@
   },
   "author": "zeustrismegistus@tutanota.com",
   "license": "GPL3",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "lab": "^12.1.0",
     "node-inspector": "^0.12.8",
