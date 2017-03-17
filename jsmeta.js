@@ -542,6 +542,7 @@
 		
 		//lock it down
 		Object.freeze(JSMeta); 	
+		
 	})();
 
 	//wire up the exports

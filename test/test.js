@@ -315,7 +315,8 @@ describe('jsmeta', () => {
 
 
     it('json serializes', (done) => {
-	
+	 
+	 
 		"use strict";
 		var ccDecObj = {};
 		ccDecObj.a = "asdfads";
