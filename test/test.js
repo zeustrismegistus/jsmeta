@@ -313,4 +313,37 @@ describe('jsmeta', () => {
 		done();
     });
 
+
+    it('json serializes', (done) => {
+	
+		"use strict";
+		var ccDecObj = {};
+		ccDecObj.a = "asdfads";
+		ccDecObj.b = "adfasd";
+		ccDecObj.c = new Date();
+		ccDecObj.d = [[1,2,3],[4,5]];
+		ccDecObj.e = 12.45;
+		ccDecObj.fn = function(a,b,c){return "adsfads" + a + b + c;};
+
+		//serialize
+		var objDat = JSONSerializer.serialize(ccDecObj);
+		
+		//eval and serialize and compare
+		var ccDecObj2;
+		var evalTxt ="ccDecObj2 = " + objDat + ";"; 
+		eval (evalTxt);
+		
+		expect(ccDecObj2.a).to.equal(ccDecObj.a);
+		expect(ccDecObj2.b).to.equal(ccDecObj.b);
+		expect(ccDecObj2.c.getTime()).to.equal(ccDecObj.c.getTime());
+		expect(ccDecObj2.e).to.equal(ccDecObj.e);
+
+		var objDat2 = JSONSerializer.serialize(ccDecObj2);
+		expect(objDat2).to.equal(objDat);
+
+		//run the function
+		expect(ccDecObj2.fn(1,2,3)).to.equal("adsfads123")
+			
+		done();
+    });	
 });

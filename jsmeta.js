@@ -404,11 +404,145 @@
 		Object.freeze(Validators);   
 
 		JSMeta.validators = Validators;
-		
-		//lock it down
-		Object.freeze(JSMeta); 		
+	
 	})();
 	
+	const JSONSerializer = 
+	{
+		serialize : function (obj)
+		{
+			//as we walk the graph we keep track of the things we're serializing so that we avoid endless/wasted loops if the graph has circular references
+			var serializedRegistry = 
+			{
+				registry : [],
+				register : function(source, text)
+				{
+					var item = { source: source, text: text};
+					this.registry.push(item);
+				},
+				getSerialized : function(source)
+				{
+					var rv = null;
+					for(var i = 0; i< this.registry.length; i++)
+					{
+						var item = this.registry[i];
+						if(item.source == source)
+						{
+							rv = item.text;
+							break;
+						}
+					}
+					return rv;
+				}
+			};
+			
+			var serializeFn = function(val)
+			{
+				//handle all primitive types first
+
+				if(val == undefined)
+					return "undefined";
+
+				var valType = typeof val;
+
+				if(valType === "boolean")
+				{
+					return val.toString();
+				}
+				else if (valType === "number")
+				{
+					return val.toString();
+				}
+				else if (valType === "string")
+				{
+					return "\x22" + val + "\x22";
+				}
+				else if (valType === "symbol")
+				{
+					return "\x22" + val + "\x22";
+				}
+				else if(valType === "function")
+				{
+					return val.toString();
+				}
+				else if(valType === "undefined")
+				{
+					return "null";
+				}
+				else if(val instanceof Date)
+				{
+					return "new Date(" + val.getTime() + ")";  
+				}
+				else if(val instanceof Array)
+				{
+					
+					valString = "[";
+					
+					if(val.length > 0)
+					{
+						for(var i=0; i<val.length -1;i++)
+						{
+							//recurse!
+							valString += serializeFn(val[i]);
+							valString += ",";
+						}			
+						
+						valString += serializeFn(val[val.length - 1]);
+					}
+					valString += "]";
+				}
+				else if(JSMeta.isEmpty(val))
+				{
+					return {};
+				}
+				else		
+				{
+					//do object serialization
+					
+					//check if already registered
+					var rv = serializedRegistry.getSerialized(val);
+				
+					if(rv !== null)
+					{
+						return rv;    
+					}
+					
+					//build it up
+					
+					valString = "{";
+					for(var p in val)
+					{
+						var member = val[p];
+						var memberName = p;
+
+						valString += memberName + ":" + serializeFn(member) + ",";
+					}
+					
+					if(valString.length > 1)
+						valString = valString.substr(0, valString.length - 1);
+
+					valString += "}";
+	  
+					//register it
+					serializedRegistry.register(val, valString);
+				}
+				return valString;
+				
+			};
+			
+			return serializeFn(obj);
+		} 
+	};
+
+	(function(){
+		//lock it down
+		Object.freeze(JSONSerializer);
+		
+		JSMeta.JSONSerializer = JSONSerializer;
+		
+		//lock it down
+		Object.freeze(JSMeta); 	
+	})();
 
 	//wire up the exports
 	
