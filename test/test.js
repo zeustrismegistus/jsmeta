@@ -327,7 +327,7 @@ describe('jsmeta', () => {
 		ccDecObj.fn = function(a,b,c){return "adsfads" + a + b + c;};
 
 		//serialize
-		var objDat = JSONSerializer.serialize(ccDecObj);
+		var objDat = jsmeta.JSONSerializer.serialize(ccDecObj);
 		
 		//eval and serialize and compare
 		var ccDecObj2;
@@ -339,7 +339,7 @@ describe('jsmeta', () => {
 		expect(ccDecObj2.c.getTime()).to.equal(ccDecObj.c.getTime());
 		expect(ccDecObj2.e).to.equal(ccDecObj.e);
 
-		var objDat2 = JSONSerializer.serialize(ccDecObj2);
+		var objDat2 = jsmeta.JSONSerializer.serialize(ccDecObj2);
 		expect(objDat2).to.equal(objDat);
 
 		//run the function
