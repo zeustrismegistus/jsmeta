@@ -1,6 +1,6 @@
 {
   "name": "d__jsmeta",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "js meta utilities",
   "main": "jsmeta.js",
   "scripts": {
