@@ -329,10 +329,7 @@ describe('jsmeta', () => {
 		//serialize
 		var objDat = jsmeta.JSONSerializer.serialize(ccDecObj);
 		
-		//eval and serialize and compare
-		var ccDecObj2;
-		var evalTxt ="ccDecObj2 = " + objDat + ";"; 
-		eval (evalTxt);
+		var ccDecObj2 = jsmeta.JSONSerializer.deserialize(objDat);
 		
 		expect(ccDecObj2.a).to.equal(ccDecObj.a);
 		expect(ccDecObj2.b).to.equal(ccDecObj.b);

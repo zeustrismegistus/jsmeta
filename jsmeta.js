@@ -409,6 +409,28 @@
 	
 	const JSONSerializer = 
 	{
+		deserialize : function(data)
+		{
+			try
+			{
+				var rv = (function()
+				{
+					var x;
+					eval("x = " + data + ";");
+					return x;
+				})();
+				return rv;
+			}
+			catch(e)
+			{
+				console.log("error deserializing ");
+				console.log(data);
+				console.log(e);
+				
+				throw e;
+			}
+			return null;
+		},
 		serialize : function (obj)
 		{
 			//as we walk the graph we keep track of the things we're serializing so that we avoid endless/wasted loops if the graph has circular references
