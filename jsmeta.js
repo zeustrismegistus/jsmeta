@@ -8,10 +8,10 @@
 			if (a == null || b == null) return false;
 			
 			if(!Array.isArray(a))
-				throw "not array";
+				throw new Error("not array");
 			
 			if(!Array.isArray(b))
-				throw "not array";
+				throw new Error("not array");
 			
 			if (a.length != b.length) return false;
 
@@ -63,10 +63,11 @@
 		},
 		isEmpty : function(val)
 		{
-			for(var prop in val) {
+			/*for(var prop in val) 
+			{
 				if(val.hasOwnProperty(prop))
 					return false;
-			}
+			}*/
 
 			return JSON.stringify(val) === JSON.stringify({});
 		},
@@ -98,11 +99,6 @@
 			{
 				rv = true;
 			}
-			else if(valType === "undefined")
-			{
-				//AKA val == null
-				rv = true;
-			}
 			else if(Array.isArray(val))
 			{
 				rv = true;
@@ -125,7 +121,7 @@
 		{    
 			"use strict";
 			if(JSMeta.isNullOrUndefined(obj))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 			
 			var rv = [];
 			for(var p in obj)
@@ -139,7 +135,7 @@
 		{    
 			"use strict";
 			if(JSMeta.isNullOrUndefined(obj))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 			
 			var args = arguments;
 			for(var i=1;i<args.length;i++)
@@ -155,7 +151,7 @@
 		{   
 			"use strict";
 			if(!JSMeta.isFunction(func))
-				throw "not a function";
+				throw new Error("not a function");
 			
 			//parse to 1st "{"
 			var origText = func.toString();
@@ -171,7 +167,7 @@
 		{   
 			"use strict";
 			if(!JSMeta.isFunction(func))
-				throw "not a function";
+				throw new Error("not a function");
 			
 			// First match everything inside the function argument parens.
 			var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
@@ -189,14 +185,14 @@
 		{    
 			"use strict";
 			if(JSMeta.isNullOrUndefined(fnA))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 			if(JSMeta.isNullOrUndefined(fnB))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 
 			if(!JSMeta.isFunction(fnA))
-				throw "not a function";
+				throw new Error("not a function");
 			if(!JSMeta.isFunction(fnB))
-				throw "not a function";
+				throw new Error("not a function");
 
 
 			//run a strict mode compare
@@ -222,7 +218,7 @@
 		{    
 			"use strict";
 			if(!JSMeta.isFunction(func))
-				throw "not a function";
+				throw new Error("not a function");
 			
 			var rv = {};
 			
@@ -251,7 +247,7 @@
 		{    
 			"use strict";
 			if(!JSMeta.isFunction(func))
-				throw "not a function";
+				throw new Error("not a function");
 			
 			var argNames = JSMeta.getFunctionArgNamesAsArray(func);
 			
@@ -262,9 +258,9 @@
 			}
 			
 			if(!Array.isArray(expectedArgNames))
-				throw "not an array";
+				throw new Error("not an array");
 			
-			var max = Math.max(expectedArgNames, argNames);
+			var max = Math.max(expectedArgNames.length, argNames.length);
 			
 			for(var i=0; i< max; i++)
 			{
@@ -283,11 +279,11 @@
 		{    
 			"use strict";
 			if(JSMeta.isNullOrUndefined(obj))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 			if(JSMeta.isNullOrUndefined(name))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 			if(JSMeta.isNullOrUndefined(argValidationFn))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 		   
 			//does the member exist?
 			if(!JSMeta.hasMembers(obj, name))
@@ -319,9 +315,9 @@
 		{    
 			"use strict";
 			if(JSMeta.isNullOrUndefined(templateObj))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 			if(JSMeta.isNullOrUndefined(testObj))
-				throw "nullOrUndefined";
+				throw new Error("nullOrUndefined");
 
 			var hasExclusions = !JSMeta.isNullOrUndefined(excludeList);
 			
@@ -358,13 +354,13 @@
 		{  
 			"use strict";
 			if(obj === undefined)
-				throw "undefined";
+				throw new Error("undefined");
 		},
 		validateNotNull : function (obj)
 		{   
 			"use strict";
 			if(obj === null)
-				throw "null";
+				throw new Error("null");
 		},
 		validateNotNullOrUndefined : function(obj)
 		{   
@@ -376,7 +372,7 @@
 		{  
 			"use strict";
 			if(!JSMeta.isFunction(expectedFn))
-				throw "not function";
+				throw new Error("not function");
 		},
 		validateIsArray : function(expectedArray)
 		{
@@ -384,7 +380,7 @@
 			Validators.validateNotNullOrUndefined(expectedArray);
 			
 			if(!Array.isArray(expectedArray))
-				throw "not array";
+				throw new Error("not array");
 		},
 		assert : function( /* assertion function returns bool*/ assertionFn)
 		{   
@@ -394,7 +390,7 @@
 			
 			var rv = assertionFn();
 			if(!rv)
-				throw "invalid assertion"
+				throw new Error("invalid assertion");
 		}
 
 	};
@@ -406,6 +402,7 @@
 		JSMeta.validators = Validators;
 	
 	})();
+	
 	
 	const JSONSerializer = 
 	{
@@ -462,9 +459,12 @@
 			{
 				//handle all primitive types first
 
-				if(val == undefined)
+				if(val === undefined)
 					return "undefined";
 
+				if(val === null)
+					return "null";
+				
 				var valType = typeof val;
 
 				if(valType === "boolean")
@@ -498,7 +498,7 @@
 				else if(val instanceof Array)
 				{
 					
-					valString = "[";
+					var valString = "[";
 					
 					if(val.length > 0)
 					{
@@ -515,7 +515,7 @@
 				}
 				else if(JSMeta.isEmpty(val))
 				{
-					return {};
+					return "{}";
 				}
 				else		
 				{
@@ -531,7 +531,7 @@
 					
 					//build it up
 					
-					valString = "{";
+					var valString = "{";
 					for(var p in val)
 					{
 						var member = val[p];
@@ -547,9 +547,9 @@
 	  
 					//register it
 					serializedRegistry.register(val, valString);
+					return valString;
 				}
-				return valString;
-				
+
 			};
 			
 			return serializeFn(obj);
@@ -566,7 +566,6 @@
 		Object.freeze(JSMeta); 	
 		
 	})();
-
 	//wire up the exports
 	
 	// Node.js

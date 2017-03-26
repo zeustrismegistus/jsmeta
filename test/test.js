@@ -22,6 +22,38 @@ describe('jsmeta', () => {
         done();
     });
 
+	it('tests arrayutil', (done) => {
+	 
+	 
+		"use strict";
+		
+		var arrEmpty = [];
+		
+		expect(jsmeta.arrayutil.areArraysEqual(null,null)).to.equal(true);
+		expect(jsmeta.arrayutil.areArraysEqual(undefined,undefined)).to.equal(true);
+		expect(jsmeta.arrayutil.areArraysEqual(arrEmpty,arrEmpty)).to.equal(true);
+		expect(jsmeta.arrayutil.areArraysEqual(null,undefined)).to.equal(false);
+		expect(function(){ return jsmeta.arrayutil.areArraysEqual({},[]);}).to.throw(Error, 'not array');
+		expect(function(){ return jsmeta.arrayutil.areArraysEqual([],{});}).to.throw(Error, 'not array');	
+		expect(jsmeta.arrayutil.areArraysEqual([],[1])).to.equal(false);
+		
+		var arrABC = ['A','B','C'];
+		var arrABC2 = ['A','B','C'];
+		var arrABD = ['A','B','D'];
+		
+		expect(jsmeta.arrayutil.areArraysEqual(arrABC,arrABC2)).to.equal(true);
+		expect(jsmeta.arrayutil.areArraysEqual(arrABC,arrABD)).to.equal(false);
+		
+		var arrABCDEF = ['A','B','C', 'D', 'E', 'F'];
+		var diff = jsmeta.arrayutil.removeSet(arrABCDEF, arrABC);
+		expect(jsmeta.arrayutil.areArraysEqual(diff, ['D','E','F'])).to.equal(true);
+		
+		expect(jsmeta.arrayutil.removeSet(null, null)).to.equal([]);
+		expect(jsmeta.arrayutil.removeSet([],null)).to.equal([]);
+			
+		done();
+    });	
+	
     it('does some general tests', (done) => {
 	
 		(function(){
@@ -31,37 +63,37 @@ describe('jsmeta', () => {
 			{
 				var u;
 
-				if(!jsmeta.isNullOrUndefined(u))
-					throw "kack!";
-
-				if(!jsmeta.isNullOrUndefined(null))
-					throw "kack!";
-
-				if(jsmeta.isNullOrUndefined("asd"))
-					throw "kack!";
+				expect(jsmeta.isNullOrUndefined(u)).to.equal(true);
+				expect(jsmeta.isNullOrUndefined(null)).to.equal(true);
+				expect(jsmeta.isNullOrUndefined()).to.equal(true);
+				expect(jsmeta.isNullOrUndefined(undefined)).to.equal(true);
+				expect(jsmeta.isNullOrUndefined("asd")).to.equal(false);
+			
 			})();
 			//isprimitive
 			(function()
 			{
 				var u;
+				
+				expect(jsmeta.isPrimitive(u)).to.equal(true);
+				expect(jsmeta.isPrimitive(null)).to.equal(true);
+				expect(jsmeta.isPrimitive(undefined)).to.equal(true);
+				expect(jsmeta.isPrimitive()).to.equal(true);
+				expect(jsmeta.isPrimitive(1)).to.equal(true);
+				expect(jsmeta.isPrimitive("asdfads")).to.equal(true);
+				expect(jsmeta.isPrimitive(true)).to.equal(true);
+				expect(jsmeta.isPrimitive({})).to.equal(false);
+				expect(jsmeta.isPrimitive([])).to.equal(true);
+				expect(jsmeta.isPrimitive(Symbol('a'))).to.equal(true);
+				
+			})();
+			
+			//isEmpty
+			(function()
+			{
+				expect(jsmeta.isEmpty({})).to.equal(true);
+				expect(jsmeta.isEmpty({a:'a', b:'b'})).to.equal(false);
 						
-				if(!jsmeta.isPrimitive(u))
-					throw "kack!";
-
-				if(!jsmeta.isPrimitive(null))
-					throw "kack!";
-
-				if(!jsmeta.isPrimitive(1))
-					throw "kack!";
-
-				if(!jsmeta.isPrimitive("asdfads"))
-					throw "kack!";
-
-				if(!jsmeta.isPrimitive(true))
-					throw "kack!";
-
-				if(jsmeta.isPrimitive({}))
-					throw "kack!";
 			})();
 			
 			//isFunction
@@ -69,14 +101,10 @@ describe('jsmeta', () => {
 			{
 				var u;
 				
-				if(!jsmeta.isFunction(function(){}))
-					throw "kack!";
-
-				if(jsmeta.isFunction(null))
-					throw "kack!";
-
-				if(jsmeta.isFunction(u))
-					throw "kack!";
+				expect(jsmeta.isFunction(function(){})).to.equal(true);
+				expect(jsmeta.isFunction(null)).to.equal(false);
+				expect(jsmeta.isFunction(u)).to.equal(false);
+				expect(jsmeta.isFunction({})).to.equal(false);
 			})();
 			
 			//hasMembers
@@ -94,14 +122,10 @@ describe('jsmeta', () => {
 					}
 				};
 				
-				if(!jsmeta.hasMembers(testObj, "propA", "propB"))
-					throw "kack";
-				
-				if(!jsmeta.hasMembers(testObj, "testFn"))
-					throw "kack";
-				
-				if(jsmeta.hasMembers(testObj, "nonmember"))
-					throw "kack";
+				expect(jsmeta.hasMembers(testObj, "propA", "propB")).to.equal(true);
+				expect(jsmeta.hasMembers(testObj, "testFn")).to.equal(true);
+				expect(jsmeta.hasMembers(testObj, "nonmember")).to.equal(false);
+				expect(function(){return jsmeta.hasMembers(null, "nonmember");}).to.throw(Error, "nullOrUndefined");
 				
 			})();
 			
@@ -121,9 +145,8 @@ describe('jsmeta', () => {
 				};
 				
 				var sig = jsmeta.getFunctionRawSignature(testObj.testFn);
-				if(sig !==  'function testFn_fake(a,b,c,d)')
-					throw "kack";
-			
+				expect(sig).to.equal('function testFn_fake(a,b,c,d)');
+				expect(function(){return jsmeta.getFunctionRawSignature(null);}).to.throw(Error, "not a function");
 			})();
 			
 			//getFunctionArgNamesAsArray
@@ -142,9 +165,10 @@ describe('jsmeta', () => {
 				};
 				
 				var args = jsmeta.getFunctionArgNamesAsArray(testObj.testFn);
-				if(!jsmeta.arrayutil.areArraysEqual(args, ['a','b','c','d']))
-					throw "kack";
-			
+				expect(jsmeta.arrayutil.areArraysEqual(args, ['a','b','c','d'])).to.equal(true);
+				
+				expect(function(){return jsmeta.getFunctionArgNamesAsArray(null);}).to.throw(Error, "not a function");
+				expect(jsmeta.arrayutil.areArraysEqual(jsmeta.getFunctionArgNamesAsArray(function(){}), [])).to.equal(true);
 			})();
 			
 			//convertFunctionArgsToMap
@@ -164,18 +188,15 @@ describe('jsmeta', () => {
 				
 				var args = jsmeta.convertFunctionArgsToMap(testObj.testFn, [1 , 2, 3, 4]);
 				
-				if(args.a !== 1)
-					throw "kack";
-				
-				if(args.b !== 2)
-					throw "kack";
-				
-				if(args.c !== 3)
-					throw "kack";
-				
-				if(args.d !== 4)
-					throw "kack";
+				expect(args.a).to.equal(1);
+				expect(args.b).to.equal(2);
+				expect(args.c).to.equal(3);
+				expect(args.d).to.equal(4);
 			
+				expect(function(){return jsmeta.convertFunctionArgsToMap({}, []);}).to.throw(Error, "not a function");
+				expect(jsmeta.convertFunctionArgsToMap(function(){},[])).to.equal({});
+				expect(jsmeta.convertFunctionArgsToMap(function(){},null)).to.equal({});
+				expect(jsmeta.convertFunctionArgsToMap(function(){},[1])).to.equal({});
 			})();
 			
 			//getMemberNamesAsArray
@@ -195,9 +216,8 @@ describe('jsmeta', () => {
 				
 				var members = jsmeta.getMemberNamesAsArray(testObj);
 				
-				if(!jsmeta.arrayutil.areArraysEqual(members, ['propA', 'propB', 'testFn']))
-					throw "kack";
-
+				expect(jsmeta.arrayutil.areArraysEqual(members, ['propA', 'propB', 'testFn'])).to.equal(true);
+				expect(function(){return jsmeta.getMemberNamesAsArray(null);}).to.throw(Error, "nullOrUndefined");
 			
 			})();
 			
@@ -217,9 +237,10 @@ describe('jsmeta', () => {
 					}
 				};
 				
-				if(!jsmeta.hasFunctionArgNames(testObj.testFn, ['a', 'b', 'c', 'd']))
-					throw "kack";
-			
+				expect(jsmeta.hasFunctionArgNames(testObj.testFn, ['a', 'b', 'c', 'd'])).to.equal(true);
+				expect(function(){return jsmeta.hasFunctionArgNames(null);}).to.throw(Error, "not a function");
+				expect(function(){return jsmeta.hasFunctionArgNames(function(){}, null);}).to.throw(Error, "not an array");
+				expect(jsmeta.hasFunctionArgNames(function(){}, ['a','b'])).to.equal(false);
 			})();
 			
 			//hasSameObjectSignaturesAsTemplate
@@ -244,8 +265,7 @@ describe('jsmeta', () => {
 					}
 				};
 				
-				if(!jsmeta.hasSameObjectSignaturesAsTemplate(templateObj, testObj))
-					throw "kack";
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate(templateObj, testObj)).to.equal(true);
 			
 			})();
 			
@@ -265,12 +285,16 @@ describe('jsmeta', () => {
 					}
 				};
 				
-				if(!jsmeta.isValidFunctionSignature(testObj, "testFn", function(args)
+				expect(jsmeta.isValidFunctionSignature(testObj, "testFn", function(args)
 				{
 					return jsmeta.arrayutil.areArraysEqual(args, ['a', 'b', 'c', 'd']);
-				}))
-					throw "kack";
+				})).to.equal(true);
 				
+				expect(function(){return jsmeta.isValidFunctionSignature(null, null, null);}).to.throw(Error, "nullOrUndefined");
+				expect(function(){return jsmeta.isValidFunctionSignature({}, null, null);}).to.throw(Error, "nullOrUndefined");
+				expect(function(){return jsmeta.isValidFunctionSignature({a:'a'}, 'a', null);}).to.throw(Error, "nullOrUndefined");
+				expect(jsmeta.isValidFunctionSignature({a:'a'}, 'b', function(args){return true;})).to.equal(false);
+				expect(jsmeta.isValidFunctionSignature({a:'a'}, 'a', function(args){return true;})).to.equal(false);
 			})();
 			
 			//hasSameFunctionSignature
@@ -286,28 +310,53 @@ describe('jsmeta', () => {
 				var diffSig4 = function testFn_fake2(a1,b,c,d){};
 				var diffSig5 = function testFn_fake2(){};
 				
-				if(!jsmeta.hasSameFunctionSignature(sig, sameExactSig, true))
-					throw "kack";
+				expect(jsmeta.hasSameFunctionSignature(sig, sameExactSig, true)).to.equal(true);
+				expect(jsmeta.hasSameFunctionSignature(sig, sameSig, false)).to.equal(true);
+				expect(jsmeta.hasSameFunctionSignature(sig, sameSig)).to.equal(true);
 				
-				if(!jsmeta.hasSameFunctionSignature(sig, sameSig, false))
-					throw "kack";
+				expect(jsmeta.hasSameFunctionSignature(sig, diffSig1)).to.equal(false);
+				expect(jsmeta.hasSameFunctionSignature(sig, diffSig2)).to.equal(false);
+				expect(jsmeta.hasSameFunctionSignature(sig, diffSig3)).to.equal(false);
+				expect(jsmeta.hasSameFunctionSignature(sig, diffSig4)).to.equal(false);
+				expect(jsmeta.hasSameFunctionSignature(sig, diffSig5)).to.equal(false);
+	
+				expect(function(){return jsmeta.hasSameFunctionSignature(null, diffSig5);}).to.throw(Error, "nullOrUndefined");
+				expect(function(){return jsmeta.hasSameFunctionSignature(diffSig5, null);}).to.throw(Error, "nullOrUndefined");
 				
-				if(!jsmeta.hasSameFunctionSignature(sig, sameSig))
-					throw "kack";
-				
-				if(jsmeta.hasSameFunctionSignature(sig, diffSig1))
-					throw "kack";
-				if(jsmeta.hasSameFunctionSignature(sig, diffSig2))
-					throw "kack";
-				if(jsmeta.hasSameFunctionSignature(sig, diffSig3))
-					throw "kack";
-				if(jsmeta.hasSameFunctionSignature(sig, diffSig4))
-					throw "kack";
-				if(jsmeta.hasSameFunctionSignature(sig, diffSig5))
-					throw "kack";		
+				expect(function(){return jsmeta.hasSameFunctionSignature({}, diffSig5);}).to.throw(Error, "not a function");
+				expect(function(){return jsmeta.hasSameFunctionSignature(diffSig5, {});}).to.throw(Error, "not a function");
+								
 			})();
 
+			//validators
+			(function()
+			{
+				expect(function(){return jsmeta.validators.validateNotUndefined();}).to.throw(Error, "undefined");
+				expect(jsmeta.validators.validateNotUndefined(null)).to.equal(undefined);
+				expect(jsmeta.validators.validateNotUndefined({})).to.equal(undefined);
+				expect(jsmeta.validators.validateNotUndefined(7)).to.equal(undefined);
+				
+				expect(function(){return jsmeta.validators.validateNotNull(null);}).to.throw(Error, "null");
+				expect(jsmeta.validators.validateNotNull()).to.equal(undefined);
+				expect(jsmeta.validators.validateNotNull({})).to.equal(undefined);
+				expect(jsmeta.validators.validateNotNull(7)).to.equal(undefined);
+				
+				
+				expect(function(){return jsmeta.validators.validateNotNullOrUndefined();}).to.throw(Error, "undefined");
+				expect(function(){return jsmeta.validators.validateNotNullOrUndefined(null);}).to.throw(Error, "null");
+				expect(function(){return jsmeta.validators.validateNotNullOrUndefined(undefined);}).to.throw(Error, "undefined");
+				
+				expect(function(){return jsmeta.validators.validateIsFunction({});}).to.throw(Error, "not function");
+				
+				expect(function(){return jsmeta.validators.validateIsArray({});}).to.throw(Error, "not array");
+				
+				expect(function(){return jsmeta.validators.assert(null);}).to.throw(Error, "null");
+				expect(function(){return jsmeta.validators.assert();}).to.throw(Error, "undefined");
+				expect(function(){return jsmeta.validators.assert({});}).to.throw(Error, "not function");				
 			
+				expect(function(){return jsmeta.validators.assert(function(){return false;});}).to.throw(Error, "invalid assertion");				
+						
+			})();
 		})();
 		
 		done();
@@ -325,7 +374,10 @@ describe('jsmeta', () => {
 		ccDecObj.d = [[1,2,3],[4,5]];
 		ccDecObj.e = 12.45;
 		ccDecObj.fn = function(a,b,c){return "adsfads" + a + b + c;};
-
+		ccDecObj.g = {};
+		ccDecObj.h = null;
+		ccDecObj.i = undefined;
+		
 		//serialize
 		var objDat = jsmeta.JSONSerializer.serialize(ccDecObj);
 		
@@ -335,7 +387,11 @@ describe('jsmeta', () => {
 		expect(ccDecObj2.b).to.equal(ccDecObj.b);
 		expect(ccDecObj2.c.getTime()).to.equal(ccDecObj.c.getTime());
 		expect(ccDecObj2.e).to.equal(ccDecObj.e);
-
+		expect(ccDecObj2.g).to.equal({});
+		expect(ccDecObj2.h).to.equal(null);
+		expect(ccDecObj2.i).to.equal(undefined);
+		
+		
 		var objDat2 = jsmeta.JSONSerializer.serialize(ccDecObj2);
 		expect(objDat2).to.equal(objDat);
 
