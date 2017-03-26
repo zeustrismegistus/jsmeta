@@ -230,7 +230,7 @@
 			var argNames = JSMeta.getFunctionArgNamesAsArray(func);
 			
 			//if there are no names for the map, there is no return data
-			if(JSMeta.isNullOrUndefined(argNames) || argNames.length == 0)
+			if(argNames.length == 0)
 				return rv;
 			
 			for(var i=0; i < argNames.length; i++)
@@ -249,28 +249,12 @@
 			if(!JSMeta.isFunction(func))
 				throw new Error("not a function");
 			
-			var argNames = JSMeta.getFunctionArgNamesAsArray(func);
-			
-			if(JSMeta.isNullOrUndefined(argNames) &&
-			   JSMeta.isNullOrUndefined(expectedArgNames))
-			{    
-				return true;
-			}
-			
 			if(!Array.isArray(expectedArgNames))
 				throw new Error("not an array");
 			
-			var max = Math.max(expectedArgNames.length, argNames.length);
+			var argNames = JSMeta.getFunctionArgNamesAsArray(func);
 			
-			for(var i=0; i< max; i++)
-			{
-				var v1 = expectedArgNames[i];
-				var v2 = argNames[i];
-				
-				if(v1 !== v2)
-					return false;
-			}
-			return true;
+			return ArrayUtil.areArraysEqual(argNames, expectedArgNames);
 		},
 			/* 
 			examines obj to see if a function of name exists, and if its args pass the validation function
@@ -319,12 +303,16 @@
 			if(JSMeta.isNullOrUndefined(testObj))
 				throw new Error("nullOrUndefined");
 
-			var hasExclusions = !JSMeta.isNullOrUndefined(excludeList);
+			if(excludeList)
+				if(!Array.isArray(excludeList))
+					throw new Error("not an array");
+				
+			var hasExclusions = !!excludeList;
 			
 			for(var p in templateObj)
 			{
 				if(hasExclusions)
-					if(p in excludeList)
+					if(excludeList.indexOf(p) > -1)
 						continue;
 				
 				if(!(p in testObj))
@@ -333,10 +321,20 @@
 				var templateMember = templateObj[p];
 				if(JSMeta.isFunction(templateMember))
 				{
-					var templateArgs = JSMeta.getFunctionArgNamesAsArray(templateMember);
 					var testMember = testObj[p];
-					if(!JSMeta.hasFunctionArgNames(testMember, templateArgs))
+					if(JSMeta.isFunction(testMember))
+					{
+						var templateArgs = JSMeta.getFunctionArgNamesAsArray(templateMember);
+						var testMemberArgs = JSMeta.getFunctionArgNamesAsArray(testMember);
+					
+						if(!JSMeta.arrayutil.areArraysEqual(templateArgs, testMemberArgs))
+							return false;
+					
+					}
+					else
+					{
 						return false;
+					}
 				}
 			}
 

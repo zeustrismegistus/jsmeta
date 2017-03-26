@@ -238,9 +238,13 @@ describe('jsmeta', () => {
 				};
 				
 				expect(jsmeta.hasFunctionArgNames(testObj.testFn, ['a', 'b', 'c', 'd'])).to.equal(true);
+				expect(jsmeta.hasFunctionArgNames(function(){}, [])).to.equal(true);
+				
 				expect(function(){return jsmeta.hasFunctionArgNames(null);}).to.throw(Error, "not a function");
-				expect(function(){return jsmeta.hasFunctionArgNames(function(){}, null);}).to.throw(Error, "not an array");
 				expect(jsmeta.hasFunctionArgNames(function(){}, ['a','b'])).to.equal(false);
+				expect(function(){return jsmeta.hasFunctionArgNames(function(){},{});}).to.throw(Error, "not an array");
+				
+				
 			})();
 			
 			//hasSameObjectSignaturesAsTemplate
@@ -266,7 +270,16 @@ describe('jsmeta', () => {
 				};
 				
 				expect(jsmeta.hasSameObjectSignaturesAsTemplate(templateObj, testObj)).to.equal(true);
-			
+				expect(function(){return jsmeta.hasSameObjectSignaturesAsTemplate(null,testObj);}).to.throw(Error, "nullOrUndefined");
+				expect(function(){return jsmeta.hasSameObjectSignaturesAsTemplate(templateObj,null);}).to.throw(Error, "nullOrUndefined");
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate(templateObj, testObj, [])).to.equal(true);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate(templateObj, testObj, ['propA'])).to.equal(true);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {a:function(a,b){}})).to.equal(false);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:function(a,b){}})).to.equal(false);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:function(a,b){}}, ['a'])).to.equal(true);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:function(a,b){}}, ['b'])).to.equal(false);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:3}, ['b'])).to.equal(false);			
+				
 			})();
 			
 			
@@ -295,6 +308,10 @@ describe('jsmeta', () => {
 				expect(function(){return jsmeta.isValidFunctionSignature({a:'a'}, 'a', null);}).to.throw(Error, "nullOrUndefined");
 				expect(jsmeta.isValidFunctionSignature({a:'a'}, 'b', function(args){return true;})).to.equal(false);
 				expect(jsmeta.isValidFunctionSignature({a:'a'}, 'a', function(args){return true;})).to.equal(false);
+				expect(jsmeta.isValidFunctionSignature({a:'a'}, 'a', function(args){throw "kack";})).to.equal(false);
+				expect(jsmeta.isValidFunctionSignature({a:'a'}, 'a', function(args){return false;})).to.equal(false);
+				expect(jsmeta.isValidFunctionSignature({a:function(a,b,c){}}, 'a', function(args){return false;})).to.equal(false);
+				expect(jsmeta.isValidFunctionSignature({a:function(a,b,c){}}, 'a', function(args){throw "kack";})).to.equal(false);				
 			})();
 			
 			//hasSameFunctionSignature
