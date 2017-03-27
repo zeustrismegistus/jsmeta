@@ -279,6 +279,11 @@ describe('jsmeta', () => {
 				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:function(a,b){}}, ['a'])).to.equal(true);
 				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:function(a,b){}}, ['b'])).to.equal(false);
 				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {b:3}, ['b'])).to.equal(false);			
+				expect(function(){return jsmeta.hasSameObjectSignaturesAsTemplate(templateObj,{},{});}).to.throw(Error, "not an array");
+				
+				
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {a:function(a,b,c){}}, [])).to.equal(true);
+				expect(jsmeta.hasSameObjectSignaturesAsTemplate({a:function(a,b,c){}}, {a:1}, [])).to.equal(false);
 				
 			})();
 			
@@ -366,12 +371,14 @@ describe('jsmeta', () => {
 				expect(function(){return jsmeta.validators.validateIsFunction({});}).to.throw(Error, "not function");
 				
 				expect(function(){return jsmeta.validators.validateIsArray({});}).to.throw(Error, "not array");
+				expect(jsmeta.validators.validateIsArray([])).to.equal(undefined);
 				
 				expect(function(){return jsmeta.validators.assert(null);}).to.throw(Error, "null");
 				expect(function(){return jsmeta.validators.assert();}).to.throw(Error, "undefined");
 				expect(function(){return jsmeta.validators.assert({});}).to.throw(Error, "not function");				
 			
-				expect(function(){return jsmeta.validators.assert(function(){return false;});}).to.throw(Error, "invalid assertion");				
+				expect(function(){return jsmeta.validators.assert(function(){return false;});}).to.throw(Error, "invalid assertion");		
+				expect(jsmeta.validators.assert(function(){return true;})).to.equal(undefined);
 						
 			})();
 		})();
@@ -388,13 +395,17 @@ describe('jsmeta', () => {
 		ccDecObj.a = "asdfads";
 		ccDecObj.b = "adfasd";
 		ccDecObj.c = new Date();
-		ccDecObj.d = [[1,2,3],[4,5]];
+		ccDecObj.d = [[1,2,3],[4,5, [6,7],[]]];
 		ccDecObj.e = 12.45;
 		ccDecObj.fn = function(a,b,c){return "adsfads" + a + b + c;};
 		ccDecObj.g = {};
 		ccDecObj.h = null;
 		ccDecObj.i = undefined;
-		
+		ccDecObj.j = {a:1}
+		ccDecObj.k = ccDecObj.j;
+		ccDecObj.l = true;
+		ccDecObj.m = Symbol('yo');
+		ccDecObj.n = {a:{a:1}};
 		//serialize
 		var objDat = jsmeta.JSONSerializer.serialize(ccDecObj);
 		
@@ -414,7 +425,11 @@ describe('jsmeta', () => {
 
 		//run the function
 		expect(ccDecObj2.fn(1,2,3)).to.equal("adsfads123")
-			
+		expect(function(){return jsmeta.JSONSerializer.deserialize('throw new Error(3);');}).to.throw(Error,3); 
+		
+		var emptyDat = jsmeta.JSONSerializer.serialize({});
+		var empty = jsmeta.JSONSerializer.deserialize(emptyDat);
+		expect(jsmeta.isEmpty(empty)).to.equal(true);
 		done();
     });	
 });

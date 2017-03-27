@@ -424,7 +424,6 @@
 				
 				throw e;
 			}
-			return null;
 		},
 		serialize : function (obj)
 		{
@@ -479,15 +478,11 @@
 				}
 				else if (valType === "symbol")
 				{
-					return "\x22" + val + "\x22";
+					return "\x22" + val.toString() + "\x22";
 				}
 				else if(valType === "function")
 				{
 					return val.toString();
-				}
-				else if(valType === "undefined")
-				{
-					return "null";
 				}
 				else if(val instanceof Date)
 				{
@@ -538,8 +533,7 @@
 						valString += memberName + ":" + serializeFn(member) + ",";
 					}
 					
-					if(valString.length > 1)
-						valString = valString.substr(0, valString.length - 1);
+					valString = valString.substr(0, valString.length - 1);
 
 					valString += "}";
 	  
@@ -565,6 +559,7 @@
 		
 	})();
 	//wire up the exports
+	/* $lab:coverage:off$ */
 	
 	// Node.js
     if (typeof module !== 'undefined' && module.exports) {
@@ -580,6 +575,7 @@
     else {
         this.jsmeta = JSMeta;
     }
+	/* $lab:coverage:on$ */
 	
 })();
 	
