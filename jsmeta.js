@@ -63,13 +63,17 @@
 		},
 		isEmpty : function(val)
 		{
-			/*for(var prop in val) 
+			//ECMA5+ 
+			return Object.keys(val).length === 0 && val.constructor === Object;
+			/*
+			for(var prop in val) 
 			{
 				if(val.hasOwnProperty(prop))
 					return false;
-			}*/
+			}
 
 			return JSON.stringify(val) === JSON.stringify({});
+			*/
 		},
 		/*is something a javascript primitive type or an array*/
 		isPrimitive : function(val)
